@@ -1,6 +1,12 @@
 # product-ms
 
 This is a microservice for managing products.
+Products are stored in a MySQL database and can be accessed using a REST API.
+
+Pre-requisites:
+- Java 17
+- MySQL 8.0.27
+- Maven 3.9.6
 
 ## Usage    
 
@@ -27,3 +33,9 @@ Deletes a product with the given ID.
 
 This microservice uses Spring Boot and Spring Data JPA for database access. All the events are logged using Slf4j.
 Entity events are published using Apache Kafka.
+
+Database Configuration:
+- URL: jdbc:mysql://localhost:3306/product_db
+- Username: root
+- Password: password
+
