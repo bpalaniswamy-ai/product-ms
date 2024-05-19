@@ -1,0 +1,68 @@
+package com.example.product.contoller;
+
+import com.example.product.entity.Product;
+import com.example.product.exception.EntityNotFoundException;
+import com.example.product.request.ProductRequest;
+import com.example.product.response.ErrorResponse;
+import com.example.product.service.ProductService;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/v1")
+@Slf4j
+public class ProductController {
+
+    @Autowired
+    private ProductService productService;
+
+    @PostMapping("/ping")
+    public String ping() {
+        return "Product Service is Up";
+    }
+
+    @PostMapping("/products")
+    public Product saveProduct(@RequestBody @Valid  ProductRequest productRequest) {
+        log.info("ProductController: saveProduct() called with request: {}", productRequest);
+        return productService.saveProduct(productRequest);
+    }
+
+    @GetMapping("/products/{id}")
+    public Product getProduct(@PathVariable("id") String id) {
+        Product product = productService.getProduct(id);
+        if (product != null)
+            return product;
+        throw new EntityNotFoundException("Product not found for id: " + id);
+    }
+
+    @DeleteMapping("/products/{id}")
+    public void deleteProduct(@PathVariable("id") String id) {
+        productService.deleteProduct(id);
+    }
+
+    @ExceptionHandler(value = EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
+}
