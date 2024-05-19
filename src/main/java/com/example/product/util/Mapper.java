@@ -8,7 +8,15 @@ import java.util.UUID;
 public class Mapper {
     public static Product mapRequestToEntity(ProductRequest request) {
         return new Product(
-                request.getId() == null? UUID.randomUUID().toString() : request.getId(),
+                request.getId() == null ? UUID.randomUUID().toString() : request.getId(),
+                request.getName(),
+                request.getDescription()
+        );
+    }
+
+    public static Product mapRequestToEntityForUpdate(Product product, ProductRequest request) {
+        return new Product(
+                product.getId(),
                 request.getName(),
                 request.getDescription()
         );

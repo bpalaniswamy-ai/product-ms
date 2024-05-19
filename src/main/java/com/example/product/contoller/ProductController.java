@@ -3,6 +3,7 @@ package com.example.product.contoller;
 import com.example.product.entity.Product;
 import com.example.product.exception.EntityNotFoundException;
 import com.example.product.request.ProductRequest;
+import com.example.product.response.EntityResponse;
 import com.example.product.response.ErrorResponse;
 import com.example.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -30,9 +31,16 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public Product saveProduct(@RequestBody @Valid  ProductRequest productRequest) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public EntityResponse saveProduct(@RequestBody @Valid  ProductRequest productRequest) {
         log.info("ProductController: saveProduct() called with request: {}", productRequest);
         return productService.saveProduct(productRequest);
+    }
+
+    @PutMapping("/products/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public EntityResponse updateProduct(@PathVariable("id") String id, @RequestBody @Valid  ProductRequest productRequest) {
+        return productService.updateProduct(id, productRequest);
     }
 
     @GetMapping("/products/{id}")
@@ -44,8 +52,13 @@ public class ProductController {
     }
 
     @DeleteMapping("/products/{id}")
-    public void deleteProduct(@PathVariable("id") String id) {
-        productService.deleteProduct(id);
+    public EntityResponse deleteProduct(@PathVariable("id") String id) {
+        return productService.deleteProduct(id);
+    }
+
+    @GetMapping("/products")
+    public Iterable<Product> getAllProducts() {
+        return productService.getAllProducts();
     }
 
     @ExceptionHandler(value = EntityNotFoundException.class)
