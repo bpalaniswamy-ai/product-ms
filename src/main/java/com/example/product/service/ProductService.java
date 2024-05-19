@@ -9,6 +9,7 @@ import com.example.product.response.EntityResponse;
 import com.example.product.util.Mapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -62,9 +63,12 @@ public class ProductService {
         return new EntityResponse(HttpStatus.OK.value(), product.getId(), "Success");
     }
 
-    public Iterable<Product> getAllProducts() {
+    public Iterable<Product> getAllProducts(int limit, int offset) {
         log.info("getting all Products");
-        return productRepository.findAll();
+        if (limit == 0 && offset == 0)
+            return productRepository.findAll();
+        Pageable pageable = Pageable.ofSize(limit).withPage(offset);
+        return productRepository.findAll(pageable);
     }
 
     public CompletionStage<Boolean> sendProductToKafka(ProductEvents events) {

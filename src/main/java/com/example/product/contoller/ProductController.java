@@ -6,7 +6,9 @@ import com.example.product.request.ProductRequest;
 import com.example.product.response.EntityResponse;
 import com.example.product.response.ErrorResponse;
 import com.example.product.service.ProductService;
+import jakarta.persistence.Id;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Null;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,14 +34,14 @@ public class ProductController {
 
     @PostMapping("/products")
     @ResponseStatus(HttpStatus.CREATED)
-    public EntityResponse saveProduct(@RequestBody @Valid  ProductRequest productRequest) {
+    public EntityResponse saveProduct(@RequestBody @Valid ProductRequest productRequest) {
         log.info("ProductController: saveProduct() called with request: {}", productRequest);
         return productService.saveProduct(productRequest);
     }
 
     @PutMapping("/products/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EntityResponse updateProduct(@PathVariable("id") String id, @RequestBody @Valid  ProductRequest productRequest) {
+    public EntityResponse updateProduct(@PathVariable("id") String id, @RequestBody @Valid ProductRequest productRequest) {
         return productService.updateProduct(id, productRequest);
     }
 
@@ -57,12 +59,13 @@ public class ProductController {
     }
 
     @GetMapping("/products")
-    public Iterable<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public Iterable<Product> getAllProducts(@RequestParam(required = false, value = "limit", defaultValue = "0") Integer limit,
+                                            @RequestParam(required = false, value = "offset", defaultValue = "0") Integer offset) {
+        return productService.getAllProducts(limit, offset);
     }
 
     @ExceptionHandler(value = EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleEntityNotFoundException(EntityNotFoundException ex) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
